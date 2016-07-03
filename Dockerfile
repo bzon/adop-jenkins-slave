@@ -13,7 +13,7 @@ ENV SWARM_PASSWORD=jenkins
 
 # Slave Env Variables
 ENV SLAVE_NAME="Swarm_Slave"
-ENV SLAVE_LABELS="docker aws ldap"
+ENV SLAVE_LABELS="docker aws ldap ansible"
 ENV SLAVE_MODE="exclusive"
 ENV SLAVE_EXECUTORS=1
 ENV SLAVE_DESCRIPTION="Core Jenkins Slave"
@@ -28,6 +28,11 @@ RUN curl -L https://github.com/docker/compose/releases/download/1.6.0/docker-com
     chmod +x /usr/local/bin/docker-compose
 RUN curl -L https://github.com/docker/machine/releases/download/v0.6.0/docker-machine-`uname -s`-`uname -m` >/usr/local/bin/docker-machine && \
     chmod +x /usr/local/bin/docker-machine
+
+# Install Ansible
+RUN yum -y install ansible && \
+    yum -y install python-boto && \
+    sed -i 's/#host_key_checking/host_key_checking/g' /etc/ansible/ansible.cfg
 
 # Install Java 
 RUN wget -q --no-check-certificate --directory-prefix=/tmp \
