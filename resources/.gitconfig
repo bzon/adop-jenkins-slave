@@ -1,0 +1,15 @@
+[user]
+  name = jenkins
+  email = jenkins@adop.com
+[alias]
+  r = !sh -c 'git rebase -i origin/$1' -
+  unpushed = log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+  gl = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+  dt = !sh -c 'git diff-tree --no-commit-id --name-only -r $1' -
+  s = status
+  b = branch
+  co = checkout
+[core]
+  longpaths = true
+[credential]
+	helper = cache --timeout=3600

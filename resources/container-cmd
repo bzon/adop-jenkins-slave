@@ -1,0 +1,16 @@
+#!/bin/bash
+
+echo "Running Jenkins Swarm Plugin...."
+
+exec java $JAVA_OPTS -jar /bin/swarm-client.jar \
+                    -fsroot ${HOME} \
+                    -master ${SWARM_MASTER} \
+                    -tunnel ${JENKINS_JNLP_HOST}:${JENKINS_SWARM_PORT} \
+                    -username ${SWARM_USER} \
+                    -passwordEnvVariable SWARM_PASSWORD \
+                    -executors ${SLAVE_EXECUTORS} \
+                    -labels "${SLAVE_LABELS}" \
+                    -mode ${SLAVE_MODE} \
+                    -name ${SLAVE_NAME} \
+                    -description "${SLAVE_DESCRIPTION}"
+                    "${MISC_SLAVE_OPTS}"
