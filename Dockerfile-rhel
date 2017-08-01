@@ -1,0 +1,85 @@
+FROM registry.access.redhat.com/rhel7:latest
+
+MAINTAINER "John Bryan Sazon"
+
+# Swarm Env Variables (defaults)
+ENV JENKINS_CONTEXT_PATH=/jenkins
+ENV SWARM_MASTER=http://jenkins:8080/${JENKINS_CONTEXT_PATH}
+ENV SWARM_USER=jenkins
+ENV SWARM_PASSWORD=jenkins
+
+# Slave Env Variables
+ENV SLAVE_NAME="Swarm_Slave"
+ENV SLAVE_LABELS="docker utility"
+ENV SLAVE_MODE="exclusive"
+ENV SLAVE_EXECUTORS=1
+ENV SLAVE_DESCRIPTION="Core Jenkins Slave"
+
+# Build Variables
+ARG DOCKER_VERSION=1.12.3
+ARG SWARM_CLIENT_VERSION=2.2
+
+# Install EPEL release
+RUN curl -O https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
+    rpm -Uvh $(ls | grep epel-release*rpm) && rm -f $(ls | grep epel-release*rpm) && \
+    rm -f epel*.rpm
+
+# Pre-requisites
+RUN yum install -y which \
+    git \
+    wget \
+    tar \
+    zip \
+    unzip \
+    openldap-clients \
+    openssl \
+    python-pip \
+    expect \
+    tree \
+    dos2unix \
+    xmlstarlet \
+    libxslt && \
+    yum clean all 
+
+RUN pip install awscli==1.10.19
+
+# Create slave user
+RUN useradd -u 1001 -r -m -d /opt/jenkins-slave -c "Jenkins Slave" jenkins-slave && \
+    groupadd -g 1010 docker && \
+    gpasswd -a jenkins-slave docker
+
+# Install docker
+RUN curl -s -o /usr/bin/docker https://get.docker.com/builds/Linux/x86_64/docker-${DOCKER_VERSION} && \
+    chmod +x /usr/bin/docker
+
+# Install Jenkins Swarm Client
+RUN curl -s -o /bin/swarm-client.jar -k https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/${SWARM_CLIENT_VERSION}/swarm-client-${SWARM_CLIENT_VERSION}-jar-with-dependencies.jar
+
+# Install JQ CLI
+RUN curl -fsSL -o /usr/bin/jq "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64" && \
+    chmod +x /usr/bin/jq
+
+# Install Ansible
+RUN yum -y install ansible && \
+    yum -y install python-boto && \
+    sed -i 's/#host_key_checking/host_key_checking/g' /etc/ansible/ansible.cfg && \
+    ansible --version
+
+# Install OpenShift CLI Tool
+RUN curl -fsSL https://github.com/openshift/origin/releases/download/v1.5.1/openshift-origin-client-tools-v1.5.1-7b451fc-linux-64bit.tar.gz | tar xzf - -C /usr/bin/ --strip-components 1 openshift-origin-client-tools-v1.5.1-7b451fc-linux-64bit/oc
+
+# Clean up and change ownership
+RUN chown -R 755 /opt/jenkins-slave && \
+    chown -R jenkins-slave:0 /opt/jenkins-slave && \
+    rm -rf /tmp/* && \
+    yum clean all
+
+# Install Java
+RUN yum -y install java-1.8.0-openjdk-devel && \
+    yum clean all
+
+USER 1001
+
+ADD resources/* /opt/jenkins-slave/
+
+CMD ["/opt/jenkins-slave/container-cmd"]
