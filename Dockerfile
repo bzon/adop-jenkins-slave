@@ -101,6 +101,9 @@ RUN yum -y install ansible && \
 # Install OpenShift CLI Tool
 RUN curl -fsSL https://github.com/openshift/origin/releases/download/v1.5.1/openshift-origin-client-tools-v1.5.1-7b451fc-linux-64bit.tar.gz | tar xzf - -C /usr/bin/ --strip-components 1 openshift-origin-client-tools-v1.5.1-7b451fc-linux-64bit/oc
 
+# Copy gitconfig
+COPY resources/.gitconfig /opt/jenkins-slave/.gitconfig
+
 # Clean up and change ownership
 RUN chown -R 755 /opt/jenkins-slave && \
     chown -R jenkins-slave:0 /opt/jenkins-slave && \
