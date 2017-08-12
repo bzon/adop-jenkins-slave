@@ -12,4 +12,6 @@
 [core]
   longpaths = true
 [credential]
-	helper = cache --timeout=3600
+  helper = cache --timeout=3600
+[http]
+  postBuffer = 104857600
