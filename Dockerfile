@@ -110,9 +110,9 @@ RUN chown -R 755 /opt/jenkins-slave && \
     rm -rf /tmp/* && \
     yum clean all
 
-USER 1001
-
 ADD resources/* /opt/jenkins-slave/
 RUN chown -R jenkins-slave:jenkins-slave /opt/jenkins-slave/
+
+USER 1001
 
 CMD ["/opt/jenkins-slave/container-cmd"]
